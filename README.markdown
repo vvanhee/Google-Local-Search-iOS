@@ -1,27 +1,36 @@
 # Google-Local-Search-iOS
 
-Some iOS (Objective-C) classes for implementing Google's Local Search API JSON interface ([http://code.google.com/apis/maps/documentation/localsearch/jsondevguide.html][GoogleLocalSearchAPI]), particularly for use in iPhone / iPad apps.
+Some iOS (Objective-C) classes for implementing [Google's Local Search API JSON interface][GoogleLocalSearchAPI], particularly for use in iPhone / iPad apps.
 
 ## Usage
 
 #### Dependencies
 
-This code depends on stig's JSON Framework for Objective C:
-[https://github.com/stig/json-framework][JSONFramework]
+This code depends on [stig's JSON Framework for Objective C][JSONFramework].  Make sure to copy these files into your project, or it won't work.
+
+This project also depends on a very small piece (GTMNSString+URLArguments) of the [Google Toolbox for Mac][GTM], which I've included.
 
 #### GoogleClientLogin class
 
-Here's some sample code showing how to use the classes:
+Here's some sample code showing how to use the classes in your viewController.  Before implementing this, make sure you have linked to the mapkit framework and imported MapKit.h.  You'll also need to set up an MKMapView named mapView (to allow region biasing of the search) and a UITextField and UITextFieldDelegate (to get the address or business name from user input).  
+
+After copying the files from this git repository into your project, you should also add the following lines to your MyMapViewController.h:
+    #import "GoogleLocalConnection.h"  
+    @class GoogleLocalObject
+
+and in MyMapViewController.m:
+    #import "GoogleLocalObject.h"
+    #import "GTMNSString+URLArguments.h"
 
 setup:
 
     GoogleLocalConnection *googleLocalConnection = [[GoogleLocalConnection alloc] initWithDelegate:self]; 
 
-< get user input, perhaps from a text field (textField.text) which you'll need to set up.  Also will need to set up an MKMapView (here called mapView) to get the region for region biasing of the search ... >
+*The addressesOnly BOOL tells the class to only give locations if they correspond to a street address (rather than a city or other region).  Maximum number of results is 8.*
 
     [googleLocalConnection getGoogleObjectsWithQuery:textField.text andMapRegion:[mapView region] andNumberOfResults:8 addressesOnly:YES];
 
-< time passes and one of the delegate methods will be called ... >
+*Time passes and one of the delegate methods will be called...*
 
 delegate methods:
 
@@ -33,8 +42,11 @@ delegate methods:
             [alert release];
         }
         else {
-            [mapView removeAllAnnotations];
+            id userAnnotation=mapView.userLocation;
+            [mapView removeAnnotations:mapView.annotations];
             [mapView addAnnotations:objects];
+            if(userAnnotation!=nil)
+            [mapView addAnnotation:userAnnotation];
             [mapView setRegion:region];
         }
     }
@@ -49,3 +61,4 @@ delegate methods:
 
  [GoogleLocalSearchAPI]: http://code.google.com/apis/maps/documentation/localsearch/jsondevguide.html
  [JSONFramework]: https://github.com/stig/json-framework
+ [GTM]: http://code.google.com/p/google-toolbox-for-mac/
