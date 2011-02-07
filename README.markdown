@@ -18,7 +18,7 @@ Here's some sample code showing how to use the classes:
 
 setup:
 
-    GoogleLocalConnection *googleLocalConnection = [[GoogleLocalConnection alloc] initWithDelegate:self];
+    GoogleLocalConnection *googleLocalConnection = [[GoogleLocalConnection alloc] initWithDelegate:self]; 
 
     < get user input, perhaps from a text field (textField.text) which you'll need to set up.  Also will need to set up an MKMapView (here called mapView) to get the region for region biasing of the search ... >
 
