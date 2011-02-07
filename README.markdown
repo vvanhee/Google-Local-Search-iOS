@@ -1,16 +1,13 @@
 # Google-Local-Search-iOS
 
-Some iOS (Objective-C) classes for implementing Google's Local Search API JSON interface ([http://code.google.com/apis/maps/documentation/localsearch/jsondevguide.html][Google Local Search API]),
-particularly for use in iPhone / iPad apps.
+Some iOS (Objective-C) classes for implementing Google's Local Search API JSON interface ([http://code.google.com/apis/maps/documentation/localsearch/jsondevguide.html][GoogleLocalSearchAPI]), particularly for use in iPhone / iPad apps.
 
 ## Usage
 
 #### Dependencies
 
 This code depends on stig's JSON Framework for Objective C:
-
-[https://github.com/stig/json-framework][JSON Framework]
-
+[https://github.com/stig/json-framework][JSONFramework]
 
 #### GoogleClientLogin class
 
@@ -20,11 +17,11 @@ setup:
 
     GoogleLocalConnection *googleLocalConnection = [[GoogleLocalConnection alloc] initWithDelegate:self]; 
 
-    < get user input, perhaps from a text field (textField.text) which you'll need to set up.  Also will need to set up an MKMapView (here called mapView) to get the region for region biasing of the search ... >
+< get user input, perhaps from a text field (textField.text) which you'll need to set up.  Also will need to set up an MKMapView (here called mapView) to get the region for region biasing of the search ... >
 
     [googleLocalConnection getGoogleObjectsWithQuery:textField.text andMapRegion:[mapView region] andNumberOfResults:8 addressesOnly:YES];
 
-    < time passes and one of the delegate methods will be called ... >
+< time passes and one of the delegate methods will be called ... >
 
 delegate methods:
 
@@ -50,6 +47,5 @@ delegate methods:
     }
 
 
- [ClientLoginAPI]: http://code.google.com/apis/accounts/docs/AuthForInstalledApps.html 
- [GTM]: http://code.google.com/p/google-toolbox-for-mac/ 
- [HowToEncodeURL]: http://simonwoodside.com/weblog/2009/4/22/how_to_really_url_encode/
+ [GoogleLocalSearchAPI]: http://code.google.com/apis/maps/documentation/localsearch/jsondevguide.html
+ [JSONFramework]: https://github.com/stig/json-framework
