@@ -16,15 +16,19 @@ Here's some sample Objective-C code showing how to use the classes in your viewC
 
 After copying the files from this git repository into your project, you should also add the following lines to your MyMapViewController.h:
     #import "GoogleLocalConnection.h"  
+
     @class GoogleLocalObject;
+
     GoogleLocalConnection *googleLocalConnection;
 
-and in MyMapViewController.m:
+Also add the delegate protocol to your @interface line in MyMapViewController.h:
+    @interface MyMapViewController : UIViewController <...,GoogleLocalConnectionDelegate> {
+
+and in MyMapViewController.m, add:
     #import "GoogleLocalObject.h"
     #import "GTMNSString+URLArguments.h"
 
 setup: 
-
     googleLocalConnection = [[GoogleLocalConnection alloc] initWithDelegate:self]; 
 
 Implement the following in your textFieldShouldReturn method:
