@@ -37,7 +37,7 @@ setup (I do this in viewDidLoad of MyMapViewController.m, and I release it in vi
 
 Implement the following in your textFieldShouldReturn method:
 
-    [googleLocalConnection getGoogleObjectsWithQuery:textField.text andMapRegion:[mapView region] andNumberOfResults:8 addressesOnly:YES];
+    [googleLocalConnection getGoogleObjectsWithQuery:textField.text andMapRegion:[mapView region] andNumberOfResults:8 addressesOnly:YES andReferer:@"http://mysuperiorsitechangethis.com"];
 
 *The addressesOnly boolean above tells the class to only give locations if they correspond to a street address (rather than a city or other region).  Maximum number of results is 8.*
 

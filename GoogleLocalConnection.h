@@ -43,7 +43,7 @@
 
 // useful functions
 -(id)initWithDelegate:(id)del;
--(void)getGoogleObjectsWithQuery:(NSString *)query andMapRegion:(MKCoordinateRegion)region andNumberOfResults:(int)numResults addressesOnly:(BOOL)addressOnly;
+-(void)getGoogleObjectsWithQuery:(NSString *)query andMapRegion:(MKCoordinateRegion)region andNumberOfResults:(int)numResults addressesOnly:(BOOL)addressOnly andReferer:(NSString *)referer;
 -(void)cancelGetGoogleObjects;
 
 // local functions

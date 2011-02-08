@@ -45,7 +45,7 @@
 }
 
 
--(void)getGoogleObjectsWithQuery:(NSString *)query andMapRegion:(MKCoordinateRegion)region andNumberOfResults:(int)numResults addressesOnly:(BOOL)addressOnly;
+-(void)getGoogleObjectsWithQuery:(NSString *)query andMapRegion:(MKCoordinateRegion)region andNumberOfResults:(int)numResults addressesOnly:(BOOL)addressOnly andReferer:(NSString *)referer;
 {
 	if (addressOnly == YES) {
 		minAccuracyValue = 8;
@@ -63,9 +63,8 @@
 	NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://ajax.googleapis.com/ajax/services/search/local?v=1.0&mrt=localonly&q=%@&rsz=%@&start=1&sll=%f,%f&sspn=%f,%f",query,numberOfResults,centerLat,centerLng,spanLat,spanLng]];
 	
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
-	[request setValue:@"Tot A Go Go (gzip)" forHTTPHeaderField:@"User-Agent"];
 	[request setValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
-	[request setValue:@"http://totagogo.com" forHTTPHeaderField:@"Referer"];
+	[request setValue:referer forHTTPHeaderField:@"Referer"];
 
 	[self cancelGetGoogleObjects];
 	
