@@ -1,6 +1,10 @@
 # Google-Local-Search-iOS
 
-Some iOS (Objective-C) classes for implementing [Google's Local Search API JSON interface][GoogleLocalSearchAPI], particularly for use in iPhone / iPad apps.
+Some iOS (Objective-C) classes for implementing [Google's Local Search API JSON interface][GoogleLocalSearchAPI], particularly for use in iPhone / iPad apps.  This allows you to find businesses / other locations by name or address using Google's Local Search API JSON interface (in Objective C, for iPhone SDK).  This interface also allows geocoding any address (so it works as a forward geocoder).  The iOS SDK only includes reverse geocoding, so this is potentially a very useful class.  
+
+Note that this API has been unfortunately deprecated by Google in late 2010, so it will stop working around late 2013.
+
+A brief overview of this class is also available on the [Tot a Go Go iPhone App Blog][TAGGBlogPost].
 
 ## Usage
 
@@ -58,6 +62,8 @@ delegate methods:
         }
     }
 
+*The above will give you a NSMutableArray of GoogleLocalObjects which you can use at will (to annotate your map, for example, as illustrated above).  See the GoogleLocalObject class for details about the variables these objects contain -- briefly, they contain a CLLocationCoordinate2d coordinate with latitude and longitude, the full address, a subtitle which is set to the address by default, and a phone number for the business if available.*
+ 
     - (void) googleLocalConnection:(GoogleLocalConnection *)conn didFailWithError:(NSError *)error
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error finding place - Try again" message:[error localizedDescription] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
@@ -69,3 +75,4 @@ delegate methods:
  [GoogleLocalSearchAPI]: http://code.google.com/apis/maps/documentation/localsearch/jsondevguide.html
  [JSONFramework]: https://github.com/stig/json-framework
  [GTM]: http://code.google.com/p/google-toolbox-for-mac/
+ [TAGGBlogPost]: http://www.totagogo.com/2011/02/08/google-local-search-ios-code/
