@@ -132,6 +132,7 @@
 				NSString *responseDetails = [NSString stringWithFormat:@"%@",[parsedJSON objectForKey:@"responseDetails"]];
 				NSError *responseError = [NSError errorWithDomain:@"GoogleLocalObjectDomain" code:[responseStatus intValue] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:responseDetails,@"NSLocalizedDescriptionKey",nil]];
 				[delegate googleLocalConnection:self didFailWithError:responseError];
+			}
 	}
 	else {
 		
