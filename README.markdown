@@ -4,7 +4,7 @@ Some iOS (Objective-C) classes for implementing [Google's Local Search API JSON 
 
 Note that this API has been unfortunately deprecated by Google in late 2010, so it will stop working around late 2013.
 
-A brief overview of this class is also available on the [Tot a Go Go iPhone App Blog][TAGGBlogPost].
+A detailed guide to implementing this (for the novice) is also available on the [Tot a Go Go iPhone App Blog][TAGGBlogPost].
 
 ## Usage
 
