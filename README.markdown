@@ -28,7 +28,7 @@ and in MyMapViewController.m, add:
     #import "GoogleLocalObject.h"
     #import "GTMNSString+URLArguments.h"
 
-setup: 
+setup (I do this in viewDidLoad of MyMapViewController.m, and I release it in viewDidUnload): 
     googleLocalConnection = [[GoogleLocalConnection alloc] initWithDelegate:self]; 
 
 Implement the following in your textFieldShouldReturn method:
