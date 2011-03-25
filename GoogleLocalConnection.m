@@ -55,6 +55,7 @@
 	}
 	if (numResults > 4) {
 		numResults = 4;
+	}
 	double centerLat = region.center.latitude;
 	double centerLng = region.center.longitude;
 	query = [query gtm_stringByEscapingForURLArgument];
