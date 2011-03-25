@@ -53,14 +53,15 @@
 	else {
 		minAccuracyValue = 0;
 	}
-
+	if (numResults > 4) {
+		numResults = 4;
 	double centerLat = region.center.latitude;
 	double centerLng = region.center.longitude;
 	query = [query gtm_stringByEscapingForURLArgument];
 	NSString *numberOfResults = [NSString stringWithFormat:@"%d",numResults];
 	double spanLat = region.span.latitudeDelta;
 	double spanLng = region.span.longitudeDelta;
-	NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://ajax.googleapis.com/ajax/services/search/local?v=1.0&mrt=localonly&q=%@&rsz=%@&start=1&sll=%f,%f&sspn=%f,%f",query,numberOfResults,centerLat,centerLng,spanLat,spanLng]];
+	NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://ajax.googleapis.com/ajax/services/search/local?v=1.0&mrt=localonly&q=%@&rsz=%@&start=0&sll=%f,%f&sspn=%f,%f",query,numberOfResults,centerLat,centerLng,spanLat,spanLng]];
 	
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
 	[request setValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
