@@ -1,5 +1,7 @@
 # Google-Local-Search-iOS
 
+If you use this code, [please upvote my response on Stack Overflow](http://stackoverflow.com/questions/3385924/integerating-google-maps-data-api-with-iphone-and-performing-search/4931857#4931857) about how to use Google Local Search.  Thanks!
+
 Some iOS (Objective-C) classes for implementing [Google's Local Search API JSON interface][GoogleLocalSearchAPI], particularly for use in iPhone / iPad apps.  This allows you to find businesses / other locations by name or address using Google's Local Search API JSON interface (in Objective C, for iPhone SDK).  This interface also allows geocoding any address (so it works as a forward geocoder).  The iOS SDK only includes reverse geocoding, so this is potentially a very useful class.  
 
 Note that this API has been unfortunately deprecated by Google in late 2010, so it will stop working around late 2013.
