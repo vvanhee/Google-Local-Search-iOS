@@ -21,12 +21,28 @@
 //  blog post about this code (if you have a website or blog):
 //  http://www.totagogo.com/2011/02/08/google-local-search-ios-code/
 
+// define some LLVM3 macros if the code is compiled with a different compiler (ie LLVMGCC42)
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+#ifndef __has_extension
+#define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
+#endif
+
+#if __has_feature(objc_arc) && __clang_major__ >= 3
+#define ARC_ENABLED 1
+#endif // __has_feature(objc_arc)
+
 #import "GoogleLocalConnection.h"
 #import "GTMNSString+URLArguments.h"
 
 @implementation GoogleLocalConnection
 
-@synthesize delegate, responseData, connection, connectionIsActive, minAccuracyValue;
+@synthesize delegate = _delegate;
+@synthesize responseData = _responseData;
+@synthesize connection = _connection;
+@synthesize connectionIsActive = _connectionIsActive;
+@synthesize minAccuracyValue = _minAccuracyValue;
 
 - (id)initWithDelegate:(id <GoogleLocalConnectionDelegate>)del
 {
@@ -48,13 +64,13 @@
 -(void)getGoogleObjectsWithQuery:(NSString *)query andMapRegion:(MKCoordinateRegion)region andNumberOfResults:(int)numResults addressesOnly:(BOOL)addressOnly andReferer:(NSString *)referer;
 {
 	if (addressOnly == YES) {
-		minAccuracyValue = 8;
+		_minAccuracyValue = 8;
 	}
 	else {
-		minAccuracyValue = 0;
+		_minAccuracyValue = 0;
 	}
-	if (numResults > 4) {
-		numResults = 4;
+	if (numResults > 10) {
+		numResults = 10;
 	}
 	double centerLat = region.center.latitude;
 	double centerLng = region.center.longitude;
@@ -64,16 +80,21 @@
 	double spanLng = region.span.longitudeDelta;
 	NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://ajax.googleapis.com/ajax/services/search/local?v=1.0&mrt=localonly&q=%@&rsz=%@&start=0&sll=%f,%f&sspn=%f,%f",query,numberOfResults,centerLat,centerLng,spanLat,spanLng]];
 	
+    NSLog( @"Google call: %@", url );
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
 	[request setValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
 	[request setValue:referer forHTTPHeaderField:@"Referer"];
 
 	[self cancelGetGoogleObjects];
 	
-	connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES];
-	if (connection) {
-		responseData = [[NSMutableData data] retain];
-		connectionIsActive = YES;
+	_connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES];
+	if (_connection) {
+#ifdef ARC_ENABLED
+		_responseData = [NSMutableData data];
+#else
+		_responseData = [[NSMutableData data] retain];
+#endif
+		_connectionIsActive = YES;
 	}		
 	else {
 	  NSLog(@"connection failed");
@@ -82,67 +103,81 @@
 
 
 - (void)connection:(NSURLConnection *)conn didReceiveResponse:(NSURLResponse *)response {
-	[responseData setLength:0];
+	[_responseData setLength:0];
 }
 
 
 - (void)connection:(NSURLConnection *)conn didReceiveData:(NSData *)data {
-	[responseData appendData:data];
+	[_responseData appendData:data];
 }
 
 - (void)connection:(NSURLConnection *)conn didFailWithError:(NSError *)error {
-	connectionIsActive = NO;
-	[delegate googleLocalConnection:self didFailWithError:error];
-	[conn release];
-	[responseData release];
+#ifdef ARC_ENABLED
+	_connectionIsActive = NO;
+	[_delegate googleLocalConnection:self didFailWithError:error];
+#else
+	_connectionIsActive = NO;
+	[_delegate googleLocalConnection:self didFailWithError:error];
+    [_conn release];
+    [responseData release];
+#endif
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)conn 
 {
 	NSLog(@"did finish loading GoogleLocalConnection");
 
-	connectionIsActive = NO;
-	NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];	
+	_connectionIsActive = NO;
+	NSString *responseString = [[NSString alloc] initWithData:_responseData encoding:NSUTF8StringEncoding];	
 	NSError *jsonError = nil;
+#ifdef ARC_ENABLED
+	SBJsonParser *json = [SBJsonParser new];
+#else
 	SBJsonParser *json = [[SBJsonParser new] autorelease];
+#endif
 
 	NSDictionary *parsedJSON = [json objectWithString:responseString error:&jsonError];
-	if ([jsonError code]==0) {
-			NSString *responseStatus = [NSString stringWithFormat:@"%@",[parsedJSON objectForKey:@"responseStatus"]];
-			if ([responseStatus isEqualToString:@"200"]) {
-				NSDictionary *gResponseData = [NSDictionary dictionaryWithDictionary:[parsedJSON objectForKey:@"responseData"]];				
-				
-				NSMutableArray *googleLocalObjects = [NSMutableArray arrayWithCapacity:[[gResponseData objectForKey:@"results"] count]]; 
-				for (int x=0; x<[[gResponseData objectForKey:@"results"] count]; x++) {
-					if ([[[[gResponseData objectForKey:@"results"] objectAtIndex:x] objectForKey:@"accuracy"] intValue] >= minAccuracyValue)
-					{
-					[googleLocalObjects addObject:(NSDictionary *)[[gResponseData objectForKey:@"results"] objectAtIndex:x]];
-					}
-				}
-				for (int x=0; x<[googleLocalObjects count]; x++) {
-					
-					GoogleLocalObject *object = [[[GoogleLocalObject alloc] initWithJsonResultDict:[googleLocalObjects objectAtIndex:x]] autorelease];
-					[googleLocalObjects replaceObjectAtIndex:x withObject:object];
-					[object description];
-				}
-				NSDictionary *viewPort = [NSDictionary dictionaryWithDictionary:[gResponseData objectForKey:@"viewport"]];
-				[delegate googleLocalConnection:self didFinishLoadingWithGoogleLocalObjects:googleLocalObjects andViewPort:[self getViewPortForGoogleSearchResults:googleLocalObjects andGoogleViewport:viewPort]];
-			}
-			else {
-				// no results
-				NSString *responseDetails = [NSString stringWithFormat:@"%@",[parsedJSON objectForKey:@"responseDetails"]];
-				NSError *responseError = [NSError errorWithDomain:@"GoogleLocalObjectDomain" code:[responseStatus intValue] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:responseDetails,@"NSLocalizedDescriptionKey",nil]];
-				[delegate googleLocalConnection:self didFailWithError:responseError];
-			}
+	if (!json.error) {
+        NSString *responseStatus = [NSString stringWithFormat:@"%@",[parsedJSON objectForKey:@"responseStatus"]];
+        if ([responseStatus isEqualToString:@"200"]) {
+            NSDictionary *gResponseData = [NSDictionary dictionaryWithDictionary:[parsedJSON objectForKey:@"responseData"]];				
+            
+            NSMutableArray *googleLocalObjects = [NSMutableArray arrayWithCapacity:[[gResponseData objectForKey:@"results"] count]]; 
+            for (int x=0; x<[[gResponseData objectForKey:@"results"] count]; x++) {
+                if ([[[[gResponseData objectForKey:@"results"] objectAtIndex:x] objectForKey:@"accuracy"] intValue] >= _minAccuracyValue)
+                {
+                    [googleLocalObjects addObject:(NSDictionary *)[[gResponseData objectForKey:@"results"] objectAtIndex:x]];
+                }
+            }
+            for (int x=0; x<[googleLocalObjects count]; x++) {
+#ifdef ARC_ENABLED					
+                GoogleLocalObject *object = [[GoogleLocalObject alloc] initWithJsonResultDict:[googleLocalObjects objectAtIndex:x]];
+#else
+                GoogleLocalObject *object = [[[GoogleLocalObject alloc] initWithJsonResultDict:[googleLocalObjects objectAtIndex:x]] autorelease];
+#endif
+                [googleLocalObjects replaceObjectAtIndex:x withObject:object];
+                [object description];
+            }
+            NSDictionary *viewPort = [NSDictionary dictionaryWithDictionary:[gResponseData objectForKey:@"viewport"]];
+            [_delegate googleLocalConnection:self didFinishLoadingWithGoogleLocalObjects:googleLocalObjects andViewPort:[self getViewPortForGoogleSearchResults:googleLocalObjects andGoogleViewport:viewPort]];
+        }
+        else {
+            // no results
+            NSString *responseDetails = [NSString stringWithFormat:@"%@",[parsedJSON objectForKey:@"responseDetails"]];
+            NSError *responseError = [NSError errorWithDomain:@"GoogleLocalObjectDomain" code:[responseStatus intValue] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:responseDetails,@"NSLocalizedDescriptionKey",nil]];
+            [_delegate googleLocalConnection:self didFailWithError:responseError];
+        }
 	}
 	else {
 		
-		[delegate googleLocalConnection:self didFailWithError:jsonError];
+		[_delegate googleLocalConnection:self didFailWithError:jsonError];
 	}
-	
-	[responseString release];	
-	[responseData release];	
-	[conn release];	
+
+#ifndef ARC_ENABLED
+    [responseString release];
+    [_responseData release];
+    [conn release];
+#endif
 }
 
 -(MKCoordinateRegion)getViewPortForGoogleSearchResults:(NSMutableArray *)googleLocalObjectArray andGoogleViewport:(NSDictionary *)viewPort
@@ -153,7 +188,7 @@
 	if ([googleLocalObjectArray count] == 1) {
 		MKCoordinateRegion searchViewPortRegion;
 		
-		if (minAccuracyValue == 8) {  // single address search
+		if (_minAccuracyValue == 8) {  // single address search
 			GoogleLocalObject *obj = (GoogleLocalObject *)[googleLocalObjectArray objectAtIndex:0];
 			searchViewPortRegion = MKCoordinateRegionMakeWithDistance([obj coordinate], 750, 750);
 		}
@@ -207,11 +242,13 @@
 
 
 - (void)cancelGetGoogleObjects {
-	if (connectionIsActive == YES) {
-		connectionIsActive = NO;
-		[connection cancel];
-		[responseData release];
-		[connection release];
+	if (_connectionIsActive == YES) {
+		_connectionIsActive = NO;
+		[_connection cancel];
+#ifndef ARC_ENABLED
+        [_responseData release];
+        [_connection release];
+#endif
 	}
 }
 
@@ -219,7 +256,9 @@
 - (void)dealloc 
 {
     [self cancelGetGoogleObjects];
+#ifndef ARC_ENABLED
     [super dealloc];
+#endif
 }
 
 

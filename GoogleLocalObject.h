@@ -39,8 +39,8 @@
 }
 
 @property (nonatomic, assign) CLLocationCoordinate2D coordinate;
-@property (nonatomic, retain) NSString *title;
-@property (nonatomic, retain) NSString *subtitle;
+@property (nonatomic, copy) NSString *title;
+@property (nonatomic, copy) NSString *subtitle;
 @property (nonatomic, retain) NSString *streetAddress;
 @property (nonatomic, retain) NSArray *fullAddressArray;
 @property (nonatomic, retain) NSString *fullAddressString;

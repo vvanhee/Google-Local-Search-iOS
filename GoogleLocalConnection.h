@@ -22,18 +22,12 @@
 //  http://www.totagogo.com/2011/02/08/google-local-search-ios-code/
 
 #import <Foundation/Foundation.h>
-#import "JSON.h"
+#import "SBJson.h"
 #import "GoogleLocalObject.h"
 
 @protocol GoogleLocalConnectionDelegate;
 
-@interface GoogleLocalConnection : NSObject {
-	id <GoogleLocalConnectionDelegate> delegate;
-	NSMutableData *responseData;
-	NSURLConnection *connection;
-	BOOL connectionIsActive;
-	int minAccuracyValue;
-}
+@interface GoogleLocalConnection : NSObject
 
 @property (nonatomic, assign) id <GoogleLocalConnectionDelegate> delegate;
 @property (nonatomic, retain) NSMutableData *responseData;
