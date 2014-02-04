@@ -21,6 +21,19 @@
 //  blog post about this code (if you have a website or blog):
 //  http://www.totagogo.com/2011/02/08/google-local-search-ios-code/
 
+// define some LLVM3 macros if the code is compiled with a different compiler (ie LLVMGCC42)
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+#ifndef __has_extension
+#define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
+#endif
+
+#if __has_feature(objc_arc) && __clang_major__ >= 3
+#define ARC_ENABLED 1
+#endif // __has_feature(objc_arc)
+
+
 #import "GoogleLocalObject.h"
 
 @implementation GoogleLocalObject
@@ -62,25 +75,22 @@
 }
 
 - (id)initWithJsonResultDict:(NSDictionary *)jsonResultDict {
-	[self initWithJsonResultDict:jsonResultDict searchTerms:@""];
-	return self;
+	return [self initWithJsonResultDict:jsonResultDict searchTerms:@""];
 }
 
 - (id)initWithJsonResultDict:(NSDictionary *)jsonResultDict searchTerms:(NSString *)terms
 {	
 	
-	[self initWithTitle:[jsonResultDict objectForKey:@"titleNoFormatting"] latitude:[[jsonResultDict objectForKey:@"lat"] doubleValue] longitude:[[jsonResultDict objectForKey:@"lng"] doubleValue] streetAddress:[jsonResultDict objectForKey:@"streetAddress"] city:[jsonResultDict objectForKey:@"city"] region:[jsonResultDict objectForKey:@"region"] phoneNumber:[[[jsonResultDict objectForKey:@"phoneNumbers"] objectAtIndex:0] objectForKey:@"number"] country:[jsonResultDict objectForKey:@"country"] searchTerms:terms fullAddress:[jsonResultDict objectForKey:@"addressLines"]];
-	return self;
+	return [self initWithTitle:[jsonResultDict objectForKey:@"titleNoFormatting"] latitude:[[jsonResultDict objectForKey:@"lat"] doubleValue] longitude:[[jsonResultDict objectForKey:@"lng"] doubleValue] streetAddress:[jsonResultDict objectForKey:@"streetAddress"] city:[jsonResultDict objectForKey:@"city"] region:[jsonResultDict objectForKey:@"region"] phoneNumber:[[[jsonResultDict objectForKey:@"phoneNumbers"] objectAtIndex:0] objectForKey:@"number"] country:[jsonResultDict objectForKey:@"country"] searchTerms:terms fullAddress:[jsonResultDict objectForKey:@"addressLines"]];
 }
 
 //the below function sets the subtitle automatically to the street address
 - (id)initWithTitle:(NSString *)tit latitude:(double)lat longitude:(double)lng streetAddress:(NSString *)strAdd city:(NSString *)cit region:(NSString *)reg phoneNumber:(NSString *)phone country:(NSString *)coun searchTerms:(NSString *)terms fullAddress:(NSArray *)fullAddrss
 {
-	[self initWithTitle:tit subtitle:strAdd latitude:lat longitude:lng streetAddress:strAdd city:cit region:reg phoneNumber:phone country:coun searchTerms:terms fullAddress:fullAddrss];
-	return self;
+	return [self initWithTitle:tit subtitle:strAdd latitude:lat longitude:lng streetAddress:strAdd city:cit region:reg phoneNumber:phone country:coun searchTerms:terms fullAddress:fullAddrss];
 }
 
-
+#ifndef ARC_ENABLED
 - (void) dealloc
 {
 	[title release];
@@ -95,5 +105,6 @@
 	[fullAddressString release];
 	[super dealloc];
 }
+#endif
 
 @end

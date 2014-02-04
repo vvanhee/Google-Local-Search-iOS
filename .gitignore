@@ -1,0 +1,14 @@
+# XCode user data
+project.xcworkspace
+xcuserdata
+
+# Temporary and files
+*~
+*.bck
+*.tmp
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
